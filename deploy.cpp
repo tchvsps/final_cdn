@@ -167,14 +167,15 @@ void zkw_speed_test(void){
 
 void zkw_opt_test(void)
 {
-        init_set(demand_cnt*2);
+        init_set(demand_cnt*1);
         init_service(service_set,last_service_size);
         int last_cost=MCMF();
         cout<<flow2string()<<endl;
 
         zkw.add_service(service_set);
         zkw.Zkw_Flow();
-        zkw.flow_test();
+//        zkw.flow_test();
+        cout<<endl<<zkw.flow_2_route();
         if(last_cost!=zkw.ans){
             cout<<"BAD!!"<<endl;
         }
@@ -196,10 +197,10 @@ void deploy_server(char * topo[MAX_EDGE_NUM], int line_num,char * filename)
 
     zkw.Init(node_cnt,node_cnt+1);
     zkw.init_graph(topo,line_num);
-//    same_eff_test();
-//    zkw_opt_test();
+    same_eff_test();
+    zkw_opt_test();
 //    spfa_zkw_time_test();
-    zkw_speed_test();
+//    zkw_speed_test();
 //    for(unsigned int i=0; i<demand_cnt*2; i++){
 //        set_from_chen_hang.insert(demand2node[i]);
 //    }

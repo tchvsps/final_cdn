@@ -1,8 +1,18 @@
 
 #include "zkw.h"
+#include<map>
+
+#include<iostream>
+#include<string>
+#include<sstream>
+
 
 //http://blog.sina.com.cn/s/blog_76f6777d0101bbc8.html
 using namespace std;
+
+
+#define SSTR( x ) static_cast< std::ostringstream & >( \
+        ( std::ostringstream() << std::dec << x ) ).str()
 
 extern unsigned int node_cnt;
 extern unsigned int demand_cnt;
@@ -163,6 +173,9 @@ void MCMF_ZKW:: flow_test()
 
     cout<<endl;
 }
+
+map<unsigned int, unsigned int> node2level;
+
 void MCMF_ZKW:: Zkw_Flow()
 {
      int i;ans=0;
@@ -185,6 +198,11 @@ void MCMF_ZKW:: Zkw_Flow()
     }else
     {
          ans+=zkw_last_service_size*deploy_cost;
+          node2level.clear();
+         for(unsigned int i=0; i<this->zkw_last_service_size; i++)
+         {
+            node2level[this->last_service_vector[i]]=0;
+         }
     }
 //    cout<<ans<<endl;
 
@@ -258,7 +276,65 @@ void MCMF_ZKW:: add_service(set<unsigned int> ser_set)
 }
 
 
-//void print_array()
+string route_string;
+unsigned int service_level;
+unsigned int route_cnt=0;
+
+extern map<unsigned int,unsigned int> node2demand;
+
+int MCMF_ZKW::dfs_for_route(unsigned int _cur_node, unsigned int in_flow)
+{
+    if(_cur_node==this->T){
+        route_string="\n";
+        return in_flow;
+    }
+
+    unsigned int _cur_edge;
+    unsigned int _tmp_cap;
+
+    for(_cur_edge=F[_cur_node];_cur_edge;_cur_edge=N[_cur_edge])
+    {
+        if(C[_cur_edge]>=0){
+            _tmp_cap=origal_G[_cur_edge]-G[_cur_edge];
+            if(_tmp_cap>0)
+            {
+                if(V[_cur_edge]==this->T){service_level=node2level[_cur_node];}
+                unsigned int _tmp_flow=dfs_for_route(V[_cur_edge],_tmp_cap<in_flow?_tmp_cap:in_flow);
+                if(_tmp_flow>0){
+                    G[_cur_edge]+=_tmp_flow;
+                    if(_cur_node==this->S){
+                        route_string = route_string.append(SSTR(node2demand[V[_cur_edge]]));
+                        route_string = route_string.append(" ");
+                        route_string = route_string.append(SSTR(_tmp_flow));
+                        route_string = route_string.append(" ");
+                        route_string = route_string.append(SSTR(service_level));
+                    }else{
+                        route_string=route_string.append(SSTR(_cur_node));
+                        route_string=route_string.append(" ");
+                    }
+                }
+                return _tmp_flow;
+            }
+        }
+    }
+}
+
+string MCMF_ZKW::flow_2_route(void)
+{
+    string _out_string="";
+    route_cnt=0;
+    route_string="";
+
+    while(dfs_for_route(this->S,INF))
+    {
+        route_cnt++;
+        _out_string=_out_string.append(route_string);
+    }
+    string _cnt_string=SSTR(route_cnt);
+    _cnt_string=_cnt_string.append("\n");
+    _out_string=_cnt_string.append(_out_string);
+    return _out_string;
+}
 
 
 

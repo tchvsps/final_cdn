@@ -43,6 +43,10 @@ class MCMF_ZKW
     void add_service(set<unsigned int> ser_set);
     void delete_service(void);
     void flow_test();
+
+    int dfs_for_route(unsigned int _cur_node, unsigned int in_flow);
+    string flow_2_route(void);
+
 };
 
 
